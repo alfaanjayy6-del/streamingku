@@ -9,19 +9,18 @@ const supabase = createClient(SB_URL, SB_KEY)
 export default function Admin() {
   const [videos, setVideos] = useState([])
 
-  const fetchVideos = async () => {
-    console.log("Sedang mencoba mengambil data...");
-    const { data, error } = await supabase.from('videos').select('*');
-    
+ const fetchVideos = async () => {
+    // Tambahkan baris ini untuk memastikan tidak ada cache
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*')
+      .order('id', { ascending: false });
+
     if (error) {
-      console.error("Error dari Supabase:", error.message);
-      alert("Error Supabase: " + error.message);
+      console.error("Gagal ambil data:", error.message);
     } else {
-      console.log("Data diterima:", data);
-      setVideos(data || []);
-      if (data.length === 0) {
-        console.log("Koneksi OK, tapi tabel 'videos' memang kosong.");
-      }
+      console.log("Data berhasil ditarik:", data);
+      setVideos(data);
     }
   }
 
