@@ -1,38 +1,46 @@
 "use client"
-import { supabase } from '../supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// --- ISI MANUAL DI SINI ---
+const SB_URL = "https://wakwbmuanzglmawqzopi.supabase.co"
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indha3dibXVhbnpnbG1hd3F6b3BpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDc5MjYsImV4cCI6MjA4NTY4MzkyNn0.oVcKaJY9-RNu4QSk32fi3h8Lb-mBm4FXFuEfwKFmLZo"
+// --------------------------
+
+const supabase = createClient(SB_URL, SB_KEY)
 
 export default function Admin() {
-  const simpanVideo = async (e) => {
+  const handleUpload = async (e) => {
     e.preventDefault();
     const judul = e.target.judul.value;
     const link = e.target.link.value;
-    
-    // Otomatis ubah link YouTube ke Embed
-    let embedLink = link;
-    if(link.includes("watch?v=")) {
-        embedLink = link.replace("watch?v=", "embed/");
+
+    // Fungsi otomatis ubah link YouTube ke Embed
+    let finalUrl = link;
+    if (link.includes("youtube.com/watch?v=")) {
+      finalUrl = link.replace("watch?v=", "embed/");
     }
 
-    // KIRIM KE SUPABASE
+    // Pakai 'public.videos' biar makin pasti
     const { error } = await supabase
-      .from('public.videos')
-      .insert([{ title: judul, url: embedLink }])
+      .from('videos') 
+      .insert([{ title: judul, url: finalUrl }]);
 
     if (error) {
-      alert("Gagal simpan: " + error.message);
+      console.error(error);
+      alert("GAGAL: " + error.message);
     } else {
-      alert("Mantap! Video berhasil diupload.");
-      e.target.reset(); // Kosongkan form lagi
+      alert("MANTAP! Video Berhasil Masuk Database.");
+      e.target.reset();
     }
   };
 
   return (
-    <div className="p-10 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-5">Panel Admin - Tambah Video</h1>
-      <form onSubmit={simpanVideo} className="space-y-4 max-w-lg">
-        <input name="judul" placeholder="Judul Film" className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white" required />
-        <input name="link" placeholder="Paste Link YouTube/Video" className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white" required />
-        <button type="submit" className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded">Upload Sekarang</button>
+    <div style={{ padding: '40px', background: '#000', color: '#fff', minHeight: '100vh' }}>
+      <h1>Panel Admin</h1>
+      <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px' }}>
+        <input name="judul" placeholder="Judul Film" style={{ padding: '10px', color: '#000' }} required />
+        <input name="link" placeholder="Link Video/YouTube" style={{ padding: '10px', color: '#000' }} required />
+        <button type="submit" style={{ padding: '10px', background: 'blue', color: 'white' }}>Upload Sekarang</button>
       </form>
     </div>
   );
