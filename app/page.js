@@ -69,7 +69,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Spasi agar konten tidak tertutup Navbar */}
+      {/* Konten Utama */}
       <div style={{ paddingTop: '80px', paddingLeft: '4%', paddingRight: '4%' }}>
         
         <h2 style={{ fontSize: '1.8rem', margin: '20px 0' }}>
@@ -88,18 +88,26 @@ export default function Home() {
             paddingBottom: '50px'
           }}>
             {filteredVideos.map((vid) => (
-              <div key={vid.id} className="card" style={{ background: '#181818', borderRadius: '8px', overflow: 'hidden' }}>
-                <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                  <iframe 
-                    src={vid.url} 
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} 
-                    allowFullScreen
-                  ></iframe>
+              /* LINK MENUJU HALAMAN DETAIL VIDEO */
+              <a href={`/watch/${vid.id}`} key={vid.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="card" style={{ 
+                  background: '#181818', 
+                  borderRadius: '8px', 
+                  overflow: 'hidden',
+                  cursor: 'pointer'
+                }}>
+                  {/* Iframe dikunci kliknya agar pindah ke halaman detail */}
+                  <div style={{ position: 'relative', paddingTop: '56.25%', pointerEvents: 'none' }}>
+                    <iframe 
+                      src={vid.url} 
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} 
+                    ></iframe>
+                  </div>
+                  <div style={{ padding: '15px' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem' }}>{vid.title}</h4>
+                  </div>
                 </div>
-                <div style={{ padding: '15px' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem' }}>{vid.title}</h4>
-                </div>
-              </div>
+              </a>
             ))}
           </div>
         )}
@@ -107,7 +115,11 @@ export default function Home() {
 
       <style jsx>{`
         .card { transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); border: 1px solid #E50914; }
+        .card:hover { 
+          transform: translateY(-5px); 
+          border: 1px solid #E50914; 
+          box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+        }
       `}</style>
     </div>
   )
