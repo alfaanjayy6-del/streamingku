@@ -19,8 +19,7 @@ export default function AdminPage() {
   const [manualUrl, setManualUrl] = useState('')
   const [manualThumb, setManualThumb] = useState('')
 
-  // State Pengumuman & Edit
-  const [announcement, setAnnouncement] = useState('')
+  // State Edit Video
   const [editData, setEditData] = useState(null)
 
   useEffect(() => {
@@ -28,20 +27,12 @@ export default function AdminPage() {
     const savedKey = localStorage.getItem('dood_api_key')
     if (savedKey) setApiDood(savedKey)
 
-    if (isLogin) {
-      fetchVideos()
-      fetchSettings()
-    }
+    if (isLogin) fetchVideos()
   }, [isLogin])
 
   const fetchVideos = async () => {
     const { data } = await supabase.from('videos').select('*').order('id', { ascending: false })
     setVideos(data || [])
-  }
-
-  const fetchSettings = async () => {
-    const { data } = await supabase.from('settings').select('announcement').eq('id', 1).single()
-    if (data) setAnnouncement(data.announcement)
   }
 
   const handleLogin = () => {
@@ -51,7 +42,6 @@ export default function AdminPage() {
 
   const syncDood = async () => {
     if (!apiDood) return alert('Isi API Key dulu!')
-    // Simpan API Key ke browser agar tidak hilang saat refresh
     localStorage.setItem('dood_api_key', apiDood)
     
     setLoading(true)
@@ -78,75 +68,95 @@ export default function AdminPage() {
     if (!error) { alert('Upload Manual Berhasil!'); setManualTitle(''); setManualUrl(''); setManualThumb(''); fetchVideos() }
   }
 
-  const handleUpdateAnnouncement = async () => {
-    await supabase.from('settings').update({ announcement }).eq('id', 1)
-    alert('Pengumuman diupdate!')
-  }
-
   const deleteVideo = async (id) => {
     if (confirm('Hapus video?')) { await supabase.from('videos').delete().eq('id', id); fetchVideos() }
   }
 
+  const handleUpdateVideo = async () => {
+    await supabase.from('videos').update({ title: editData.title, thumbnail: editData.thumbnail, url: editData.url }).eq('id', editData.id)
+    setEditData(null); fetchVideos()
+  }
+
   if (!isLogin) return (
     <div style={{ background: '#000', height: '100vh', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ background: '#111', padding: '30px', borderRadius: '10px', textAlign: 'center' }}>
-        <h3 style={{ color: '#E50914' }}>ADMIN LOGIN</h3>
-        <input type="password" onChange={(e) => setPass(e.target.value)} style={{ padding: '10px', borderRadius: '5px', border: 'none', marginBottom: '10px', width: '100%' }} />
-        <button onClick={handleLogin} style={{ width: '100%', padding: '10px', background: '#E50914', color: '#fff', border: 'none', borderRadius: '5px' }}>MASUK</button>
+      <div style={{ background: '#111', padding: '30px', borderRadius: '10px', textAlign: 'center', width: '300px' }}>
+        <h3 style={{ color: '#E50914', marginBottom: '20px' }}>ADMIN LOGIN</h3>
+        <input type="password" placeholder="Password" onChange={(e) => setPass(e.target.value)} style={{ padding: '12px', borderRadius: '5px', border: 'none', marginBottom: '10px', width: '100%', boxSizing: 'border-box' }} />
+        <button onClick={handleLogin} style={{ width: '100%', padding: '12px', background: '#E50914', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>MASUK</button>
       </div>
     </div>
   )
 
   return (
     <div style={{ padding: '20px', background: '#000', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
+      <h2 style={{ color: '#E50914', textAlign: 'center', marginBottom: '30px' }}>ADMIN PANEL</h2>
       
-      {/* 1. PENGUMUMAN */}
-      <div style={{ background: '#111', padding: '20px', borderRadius: '10px', marginBottom: '20px', border: '1px solid #E50914' }}>
-        <h4 style={{marginTop:0}}>GANTI PENGUMUMAN</h4>
-        <input value={announcement} onChange={(e) => setAnnouncement(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px', boxSizing: 'border-box' }} />
-        <button onClick={handleUpdateAnnouncement} style={{ width: '100%', padding: '10px', background: '#0088cc', color: '#fff', border: 'none', borderRadius: '5px' }}>UPDATE PESAN</button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '30px' }}>
         
-        {/* 2. SYNC OTOMATIS */}
-        <div style={{ background: '#111', padding: '20px', borderRadius: '10px' }}>
-          <h4>SYNC DOODSTREAM</h4>
-          <input value={apiDood} onChange={(e) => setApiDood(e.target.value)} placeholder="API Key (Otomatis Tersimpan)" style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px', boxSizing: 'border-box' }} />
-          <select value={limit} onChange={(e) => setLimit(parseInt(e.target.value))} style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px' }}>
-            <option value={10}>Tarik 10 Video</option>
-            <option value={50}>Tarik 50 Video</option>
-            <option value={100}>Tarik 100 Video</option>
-          </select>
-          <button onClick={syncDood} disabled={loading} style={{ width: '100%', padding: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>
-            {loading ? 'SINKRONISASI...' : 'JALANKAN SYNC'}
+        {/* SYNC DOODSTREAM */}
+        <div style={{ background: '#111', padding: '20px', borderRadius: '10px', border: '1px solid #222' }}>
+          <h4 style={{ marginTop: 0 }}>SYNC DOODSTREAM</h4>
+          <input value={apiDood} onChange={(e) => setApiDood(e.target.value)} placeholder="API Key Doodstream" style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px', boxSizing: 'border-box' }} />
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ fontSize: '0.8rem', color: '#888' }}>Mau narik berapa video?</label>
+            <select value={limit} onChange={(e) => setLimit(parseInt(e.target.value))} style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginTop: '5px' }}>
+                <option value={10}>10 Video Terbaru</option>
+                <option value={20}>20 Video Terbaru</option>
+                <option value={50}>50 Video Terbaru</option>
+                <option value={100}>100 Video Terbaru</option>
+            </select>
+          </div>
+          <button onClick={syncDood} disabled={loading} style={{ width: '100%', padding: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
+            {loading ? 'MEMPROSES...' : 'JALANKAN SYNC'}
           </button>
         </div>
 
-        {/* 3. UPLOAD MANUAL */}
-        <div style={{ background: '#111', padding: '20px', borderRadius: '10px' }}>
-          <h4>UPLOAD MANUAL</h4>
+        {/* UPLOAD MANUAL */}
+        <div style={{ background: '#111', padding: '20px', borderRadius: '10px', border: '1px solid #222' }}>
+          <h4 style={{ marginTop: 0 }}>UPLOAD MANUAL</h4>
           <form onSubmit={handleManualUpload}>
-            <input placeholder="Judul" value={manualTitle} onChange={(e)=>setManualTitle(e.target.value)} required style={{ width: '100%', padding: '8px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '8px', boxSizing:'border-box' }} />
-            <input placeholder="URL Embed" value={manualUrl} onChange={(e)=>setManualUrl(e.target.value)} required style={{ width: '100%', padding: '8px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '8px', boxSizing:'border-box' }} />
-            <input placeholder="URL Thumb" value={manualThumb} onChange={(e)=>setManualThumb(e.target.value)} required style={{ width: '100%', padding: '8px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '8px', boxSizing:'border-box' }} />
-            <button type="submit" style={{ width: '100%', padding: '10px', background: '#E50914', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>TAMBAHKAN VIDEO</button>
+            <input placeholder="Judul Film" value={manualTitle} onChange={(e)=>setManualTitle(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px', boxSizing: 'border-box' }} />
+            <input placeholder="URL Embed Video" value={manualUrl} onChange={(e)=>setManualUrl(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px', boxSizing: 'border-box' }} />
+            <input placeholder="URL Thumbnail" value={manualThumb} onChange={(e)=>setManualThumb(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '5px', background: '#000', color: '#fff', border: '1px solid #333', marginBottom: '10px', boxSizing: 'border-box' }} />
+            <button type="submit" style={{ width: '100%', padding: '12px', background: '#E50914', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>TAMBAHKAN</button>
           </form>
         </div>
       </div>
 
-      {/* 4. DAFTAR VIDEO */}
-      <div style={{ background: '#111', padding: '20px', borderRadius: '10px' }}>
-        <h4>DAFTAR VIDEO ({videos.length})</h4>
-        <div style={{ display: 'grid', gap: '8px' }}>
+      {/* DAFTAR VIDEO */}
+      <div style={{ background: '#111', padding: '20px', borderRadius: '10px', border: '1px solid #222' }}>
+        <h4 style={{ marginTop: 0 }}>DAFTAR VIDEO ({videos.length})</h4>
+        <div style={{ display: 'grid', gap: '10px' }}>
           {videos.map((v) => (
-            <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '10px', borderRadius: '5px' }}>
-              <span style={{ fontSize: '0.8rem' }}>{v.title}</span>
-              <button onClick={() => deleteVideo(v.id)} style={{ background: '#444', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px' }}>Hapus</button>
+            <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '12px', borderRadius: '8px', border: '1px solid #222' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <img src={v.thumbnail} style={{ width: '50px', height: '35px', objectFit: 'cover', borderRadius: '4px' }} onError={(e)=>e.target.src="https://via.placeholder.com/50x35"} />
+                <span style={{ fontSize: '0.85rem', color: '#ddd' }}>{v.title}</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => setEditData(v)} style={{ background: '#0088cc', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '0.75rem', cursor: 'pointer' }}>Edit</button>
+                <button onClick={() => deleteVideo(v.id)} style={{ background: '#333', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '0.75rem', cursor: 'pointer' }}>Hapus</button>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* MODAL EDIT */}
+      {editData && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+          <div style={{ background: '#111', padding: '25px', borderRadius: '12px', width: '100%', maxWidth: '400px', border: '1px solid #333' }}>
+            <h4 style={{ marginTop: 0, color: '#E50914' }}>EDIT VIDEO</h4>
+            <input value={editData.title} onChange={(e) => setEditData({...editData, title: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#000', color: '#fff', border: '1px solid #333', borderRadius: '5px' }} />
+            <input value={editData.thumbnail} onChange={(e) => setEditData({...editData, thumbnail: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#000', color: '#fff', border: '1px solid #333', borderRadius: '5px' }} />
+            <input value={editData.url} onChange={(e) => setEditData({...editData, url: e.target.value})} style={{ width: '100%', padding: '10px', marginBottom: '20px', background: '#000', color: '#fff', border: '1px solid #333', borderRadius: '5px' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={handleUpdateVideo} style={{ flex: 1, padding: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>SIMPAN</button>
+              <button onClick={() => setEditData(null)} style={{ flex: 1, padding: '12px', background: '#444', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>BATAL</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
