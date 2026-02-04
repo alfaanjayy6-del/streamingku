@@ -25,23 +25,44 @@ export default function WatchPage() {
   }
 
   const fetchRelated = async () => {
-    const { data } = await supabase.from('videos').select('*').limit(6).order('id', { ascending: false })
+    // Mengambil 10 video terbaru untuk rekomendasi
+    const { data } = await supabase.from('videos').select('*').limit(10).order('id', { ascending: false })
     if (data) setRelated(data.filter(v => v.id != id))
   }
 
-  if (!video) return <div style={{ background: '#000', height: '100vh', color: '#fff', textAlign: 'center', paddingTop: '100px' }}>Loading Video...</div>
+  if (!video) return (
+    <div style={{ background: '#000', height: '100vh', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <p>Memuat Video...</p>
+    </div>
+  )
 
   return (
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+      
       {/* NAVBAR SIMPLE */}
-      <nav style={{ padding: '15px 5%', background: '#000', borderBottom: '1px solid #222' }}>
-        <a href="/" style={{ color: '#E50914', textDecoration: 'none', fontWeight: 'bold', fontSize: '1.2rem' }}>← KEMBALI</a>
+      <nav style={{ 
+        padding: '15px 5%', 
+        background: '#000', 
+        borderBottom: '1px solid #222', 
+        display: 'flex', 
+        alignItems: 'center' 
+      }}>
+        <a href="/" style={{ color: '#E50914', textDecoration: 'none', fontWeight: 'bold', fontSize: '1rem' }}>
+          ← BERANDA
+        </a>
       </nav>
 
-      <div style={{ padding: '20px 5%', maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ padding: '20px 5%', maxWidth: '1100px', margin: '0 auto' }}>
         
-        {/* PLAYER */}
-        <div style={{ position: 'relative', paddingTop: '56.25%', background: '#111', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
+        {/* PLAYER BOX */}
+        <div style={{ 
+          position: 'relative', 
+          paddingTop: '56.25%', // Rasio 16:9
+          background: '#111', 
+          borderRadius: '12px', 
+          overflow: 'hidden', 
+          boxShadow: '0 10px 40px rgba(0,0,0,0.9)' 
+        }}>
           <iframe 
             src={video.url} 
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} 
@@ -50,36 +71,60 @@ export default function WatchPage() {
         </div>
 
         {/* INFO VIDEO */}
-        <h1 style={{ fontSize: '1.4rem', marginTop: '20px', marginBottom: '10px' }}>{video.title}</h1>
-        <div style={{ height: '1px', background: '#222', marginBottom: '20px' }}></div>
-
-        {/* SLOT IKLAN ADSTERRA (BANNER) */}
-        <div style={{ background: '#111', padding: '10px', textAlign: 'center', borderRadius: '8px', marginBottom: '30px' }}>
-            <p style={{ fontSize: '0.6rem', color: '#555', margin: '0 0 5px 0' }}>ADVERTISEMENT</p>
-            {/* Ganti ID di bawah ini dengan script banner Adsterra kamu */}
-            <div id="adsterra-banner">
-                <p style={{ color: '#3498db', fontSize: '0.8rem' }}>Iklan akan muncul di sini</p>
-            </div>
+        <div style={{ marginTop: '20px', marginBottom: '30px' }}>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: '10px', color: '#fff' }}>{video.title}</h1>
+          <div style={{ height: '1px', background: '#222', width: '100%' }}></div>
         </div>
 
         {/* REKOMENDASI LAINNYA */}
-        <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#E50914' }}>Nonton Lainnya</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '15px' }}>
-          {related.map((v) => (
-            <a href={`/watch/${v.id}`} key={v.id} style={{ textDecoration: 'none', color: '#fff' }}>
-              <div style={{ position: 'relative', paddingTop: '140%', background: '#222', borderRadius: '5px', overflow: 'hidden' }}>
-                <img 
-                   src={`https://images.weserv.nl/?url=${encodeURIComponent(v.thumbnail)}`} 
-                   referrerPolicy="no-referrer"
-                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-              </div>
-              <p style={{ fontSize: '0.7rem', marginTop: '5px', height: '2.4em', overflow: 'hidden' }}>{v.title}</p>
-            </a>
-          ))}
+        <div style={{ marginTop: '40px' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#E50914', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Mungkin Kamu Suka
+          </h3>
+          
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+            gap: '15px' 
+          }}>
+            {related.map((v) => (
+              <a href={`/watch/${v.id}`} key={v.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ 
+                  position: 'relative', 
+                  paddingTop: '145%', 
+                  background: '#1a1a1a', 
+                  borderRadius: '8px', 
+                  overflow: 'hidden',
+                  transition: 'transform 0.2s'
+                }}>
+                  <img 
+                     src={`https://images.weserv.nl/?url=${encodeURIComponent(v.thumbnail)}&w=300`} 
+                     referrerPolicy="no-referrer"
+                     alt={v.title}
+                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                </div>
+                <h4 style={{ 
+                  fontSize: '0.75rem', 
+                  marginTop: '8px', 
+                  fontWeight: 'normal', 
+                  height: '2.5em', 
+                  overflow: 'hidden',
+                  lineHeight: '1.2em'
+                }}>
+                  {v.title}
+                </h4>
+              </a>
+            ))}
+          </div>
         </div>
 
       </div>
+
+      {/* FOOTER SIMPLE */}
+      <footer style={{ padding: '40px 5%', textAlign: 'center', color: '#444', fontSize: '0.8rem' }}>
+        © 2026 STREAMINGKU - Nonton Gratis Kualitas Tinggi
+      </footer>
     </div>
   )
 }
