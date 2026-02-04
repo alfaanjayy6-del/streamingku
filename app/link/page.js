@@ -1,21 +1,32 @@
 "use client"
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function BridgePage() {
-  const [countdown, setCountdown] = useState(3);
-  const WEB_UTAMA = "/"; // Mengarah ke beranda web kamu
+  const [countdown, setCountdown] = useState(5); // Waktu tunggu 5 detik
+  const router = useRouter();
+  
+  const WEB_UTAMA = "/"; // Alamat web utama kamu
   const TELEGRAM_LINK = "https://t.me/+d9TcoaiEqwQ3M2U1"; // Ganti link tele kamu
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          router.push(WEB_UTAMA); // Lempar ke web utama
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [router]);
 
   return (
     <div style={{ 
-      backgroundColor: '#0a0a0a', 
+      backgroundColor: '#050505', 
       color: '#fff', 
       height: '100vh', 
       display: 'flex', 
@@ -26,47 +37,58 @@ export default function BridgePage() {
       padding: '20px',
       textAlign: 'center'
     }}>
-      {/* Tampilan seperti Portal Berita/Informasi agar aman dari bot Threads */}
       <div style={{ maxWidth: '400px', width: '100%' }}>
-        <h1 style={{ color: '#E50914', fontSize: '1.5rem', marginBottom: '10px' }}>INFO STREAMING</h1>
+        {/* ANIMASI LOADING SEDERHANA */}
+        <div style={{ 
+          width: '50px', 
+          height: '50px', 
+          border: '5px solid #333', 
+          borderTop: '5px solid #E50914', 
+          borderRadius: '50%', 
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 20px auto'
+        }}></div>
+
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Menyiapkan Server Nonton...</h2>
         <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '30px' }}>
-          Terima kasih telah berkunjung. Klik tombol di bawah untuk menuju server nonton.
+          Kamu akan dialihkan otomatis dalam <span style={{ color: '#E50914', fontWeight: 'bold' }}>{countdown}</span> detik.
         </p>
 
-        {/* TOMBOL UTAMA */}
+        {/* TOMBOL MANUAL (Jaga-jaga kalau auto redirect gagal di HP tertentu) */}
         <a href={WEB_UTAMA} style={{ 
           display: 'block', 
           background: '#E50914', 
           color: '#fff', 
           textDecoration: 'none', 
           padding: '15px', 
-          borderRadius: '30px', 
+          borderRadius: '8px', 
           fontWeight: 'bold',
-          marginBottom: '15px',
-          boxShadow: '0 4px 15px rgba(229, 9, 20, 0.4)'
+          marginBottom: '15px'
         }}>
-          MULAI NONTON SEKARANG
+          KLIK DISINI JIKA TIDAK PINDAH
         </a>
 
-        {/* TOMBOL TELEGRAM (Back-up kalau web utama keblokir) */}
-        <a href={TELEGRAM_LINK} style={{ 
+        <a href={TELEGRAM_LINK} target="_blank" style={{ 
           display: 'block', 
-          background: '#0088cc', 
-          color: '#fff', 
+          color: '#0088cc', 
           textDecoration: 'none', 
-          padding: '12px', 
-          borderRadius: '30px', 
-          fontWeight: 'bold',
-          fontSize: '0.9rem'
+          fontSize: '0.85rem',
+          fontWeight: 'bold'
         }}>
-          JOIN GRUP UPDATE FILM
+          Join Telegram (Update Film Terbaru)
         </a>
 
-        <div style={{ marginTop: '40px', fontSize: '0.8rem', color: '#444' }}>
-          <p>Situs ini aman dan bebas malware.</p>
-          <p>© 2026 Portal Media Indonesia</p>
+        <div style={{ marginTop: '50px', fontSize: '0.7rem', color: '#222' }}>
+          <p>Situs ini menggunakan sistem keamanan cloud demi kenyamanan pengunjung.</p>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}} />
     </div>
   )
 }
