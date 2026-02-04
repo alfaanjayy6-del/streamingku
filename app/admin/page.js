@@ -13,6 +13,11 @@ export default function AdminPage() {
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(false)
 
+  // State untuk Form Manual
+  const [manualTitle, setManualTitle] = useState('')
+  const [manualUrl, setManualUrl] = useState('')
+  const [manualThumb, setManualThumb] = useState('')
+
   useEffect(() => {
     if (isLogin) fetchVideos()
   }, [isLogin])
@@ -23,10 +28,11 @@ export default function AdminPage() {
   }
 
   const handleLogin = () => {
-    if (pass === '130903') setIsLogin(true) // Ganti password sesukamu
+    if (pass === '130903') setIsLogin(true) 
     else alert('Password Salah!')
   }
 
+  // --- FUNGSI SYNC OTOMATIS ---
   const syncDood = async () => {
     if (!apiDood) return alert('Isi API Key Doodstream dulu!')
     setLoading(true)
@@ -37,14 +43,31 @@ export default function AdminPage() {
         const toInsert = json.result.map(f => ({
           title: f.title,
           url: `https://doodstream.com/e/${f.file_code}`,
-          thumbnail: f.single_img || `https://thumbcdn.com/snaps/${f.file_code}.jpg`
+          thumbnail: `https://thumbcdn.com/snaps/${f.file_code}.jpg`
         }))
         await supabase.from('videos').insert(toInsert)
-        alert('Berhasil Sync!')
+        alert('Sync Berhasil!')
         fetchVideos()
       }
     } catch (e) { alert('Gagal Sync!') }
     setLoading(false)
+  }
+
+  // --- FUNGSI UPLOAD MANUAl ---
+  const handleManualUpload = async (e) => {
+    e.preventDefault()
+    const { error } = await supabase.from('videos').insert([{
+      title: manualTitle,
+      url: manualUrl,
+      thumbnail: manualThumb
+    }])
+    if (!error) {
+      alert('Video Manual Berhasil Ditambah!')
+      setManualTitle(''); setManualUrl(''); setManualThumb('')
+      fetchVideos()
+    } else {
+      alert('Gagal Upload Manual!')
+    }
   }
 
   const deleteVideo = async (id) => {
@@ -74,29 +97,46 @@ export default function AdminPage() {
 
   return (
     <div style={{ padding: '20px', background: '#000', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
-      <h2 style={{ color: '#E50914' }}>DASHBOARD ADMIN</h2>
+      <h2 style={{ color: '#E50914', textAlign: 'center', marginBottom: '30px' }}>DASHBOARD ADMIN</h2>
       
-      {/* TOOLBAR */}
-      <div style={{ background: '#111', padding: '20px', borderRadius: '10px', marginBottom: '20px' }}>
-        <p style={{ margin: '0 0 10px 0' }}>API Key Doodstream:</p>
-        <input value={apiDood} onChange={(e) => setApiDood(e.target.value)} placeholder="Masukkan API Key..." style={{ padding: '10px', width: '300px', borderRadius: '5px', border: '1px solid #333', background: '#000', color: '#fff', marginRight: '10px' }} />
-        <button onClick={syncDood} disabled={loading} style={{ padding: '10px 20px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '5px' }}>
-          {loading ? 'SINKRONISASI...' : 'SYNC DARI DOODSTREAM'}
-        </button>
-        <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px' }}>Total Video: {videos.length}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+        
+        {/* BAGIAN SYNC OTOMATIS */}
+        <div style={{ background: '#111', padding: '20px', borderRadius: '10px' }}>
+          <h4>SINKRONISASI DOODSTREAM</h4>
+          <input value={apiDood} onChange={(e) => setApiDood(e.target.value)} placeholder="API Key Doodstream" style={{ padding: '10px', width: '100%', borderRadius: '5px', border: '1px solid #333', background: '#000', color: '#fff', marginBottom: '10px', boxSizing: 'border-box' }} />
+          <button onClick={syncDood} disabled={loading} style={{ width: '100%', padding: '10px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>
+            {loading ? 'MEMPROSES...' : 'SYNC DATA TERBARU'}
+          </button>
+        </div>
+
+        {/* BAGIAN UPLOAD MANUAL */}
+        <div style={{ background: '#111', padding: '20px', borderRadius: '10px' }}>
+          <h4>UPLOAD MANUAL</h4>
+          <form onSubmit={handleManualUpload}>
+            <input placeholder="Judul Video" value={manualTitle} onChange={(e)=>setManualTitle(e.target.value)} required style={{ padding: '8px', width: '100%', borderRadius: '5px', border: '1px solid #333', background: '#000', color: '#fff', marginBottom: '10px', boxSizing: 'border-box' }} />
+            <input placeholder="URL Embed (Iframe)" value={manualUrl} onChange={(e)=>setManualUrl(e.target.value)} required style={{ padding: '8px', width: '100%', borderRadius: '5px', border: '1px solid #333', background: '#000', color: '#fff', marginBottom: '10px', boxSizing: 'border-box' }} />
+            <input placeholder="URL Thumbnail" value={manualThumb} onChange={(e)=>setManualThumb(e.target.value)} required style={{ padding: '8px', width: '100%', borderRadius: '5px', border: '1px solid #333', background: '#000', color: '#fff', marginBottom: '10px', boxSizing: 'border-box' }} />
+            <button type="submit" style={{ width: '100%', padding: '10px', background: '#E50914', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}>TAMBAHKAN VIDEO</button>
+          </form>
+        </div>
+
       </div>
 
+      <p style={{ textAlign: 'center', color: '#888' }}>Total Video di Database: {videos.length}</p>
+
       {/* DAFTAR VIDEO */}
-      <div style={{ display: 'grid', gap: '10px' }}>
+      <h4 style={{ borderBottom: '1px solid #222', paddingBottom: '10px' }}>DAFTAR VIDEO</h4>
+      <div style={{ display: 'grid', gap: '8px' }}>
         {videos.map((v) => (
-          <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#111', padding: '15px', borderRadius: '8px', border: '1px solid #222' }}>
+          <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#111', padding: '10px 15px', borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <img src={v.thumbnail} style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                <span style={{ fontSize: '0.9rem' }}>{v.title}</span>
+                <img src={v.thumbnail} style={{ width: '50px', height: '30px', objectFit: 'cover', borderRadius: '4px' }} onError={(e)=>e.target.src="https://via.placeholder.com/50"} />
+                <span style={{ fontSize: '0.85rem' }}>{v.title}</span>
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => editTitle(v.id, v.title)} style={{ background: '#0088cc', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: '4px', cursor: 'pointer' }}>Edit</button>
-              <button onClick={() => deleteVideo(v.id)} style={{ background: '#E50914', color: '#fff', border: 'none', padding: '5px 12px', borderRadius: '4px', cursor: 'pointer' }}>Hapus</button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => editTitle(v.id, v.title)} style={{ background: '#0088cc', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem' }}>Edit</button>
+              <button onClick={() => deleteVideo(v.id)} style={{ background: '#444', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem' }}>Hapus</button>
             </div>
           </div>
         ))}
