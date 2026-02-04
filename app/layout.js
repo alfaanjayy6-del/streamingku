@@ -13,16 +13,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="id">
       <head>
-        {/* Adsterra Pop-under */}
+        {/* Adsterra Pop-under - Menggunakan afterInteractive agar iklan siap lebih cepat */}
         <Script 
           src="https://pl27333728.effectivegatecpm.com/e4/6a/bf/e46abf385099c2b5d894dbb1c522e30c.js" 
-          strategy="lazyOnload" 
+          strategy="afterInteractive" 
         />
       </head>
-      <body style={{ margin: 0, backgroundColor: '#000', color: '#fff' }}>
+      <body style={{ margin: 0, backgroundColor: '#000', color: '#fff', minHeight: '100vh' }}>
+        
+        {/* Konten Utama Website */}
         {children}
 
-        {/* --- TOMBOL TELEGRAM MELAYANG DENGAN NOTIFIKASI --- */}
+        {/* --- TOMBOL TELEGRAM MELAYANG --- */}
         <div style={{ position: 'fixed', bottom: '25px', right: '20px', zIndex: 10000 }}>
           <a 
             href={TELEGRAM_LINK}
@@ -41,6 +43,8 @@ export default function RootLayout({ children }) {
               transition: 'transform 0.3s ease',
               position: 'relative'
             }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             {/* Icon Pesawat Kertas Telegram */}
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -79,7 +83,7 @@ export default function RootLayout({ children }) {
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes ping {
             75%, 100% {
-              transform: scale(2);
+              transform: scale(2.5);
               opacity: 0;
             }
           }
