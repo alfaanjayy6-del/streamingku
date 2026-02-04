@@ -2,13 +2,13 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-// KONFIGURASI SUPABASE
 const SB_URL = "https://wakwbmuanzglmawqzopi.supabase.co"
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indha3dibXVhbnpnbG1hd3F6b3BpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDc5MjYsImV4cCI6MjA4NTY4MzkyNn0.oVcKaJY9-RNu4QSk32fi3h8Lb-mBm4FXFuEfwKFmLZo"
 const supabase = createClient(SB_URL, SB_KEY)
 
 export default function Home() {
   const [videos, setVideos] = useState([])
+  const [featured, setFeatured] = useState([])
   const [filteredVideos, setFilteredVideos] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -21,6 +21,8 @@ export default function Home() {
     if (data) {
       setVideos(data)
       setFilteredVideos(data)
+      // Ambil 4 video terbaru untuk jadi "Populer/Featured"
+      setFeatured(data.slice(0, 4))
     }
   }
 
@@ -34,156 +36,60 @@ export default function Home() {
   return (
     <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', fontFamily: 'sans-serif' }}>
       
-      {/* NAVBAR MODERN DENGAN LOGO PREMIUM */}
-      <nav style={{ 
-        padding: '12px 5%', 
-        background: 'rgba(0,0,0,0.7)', 
-        position: 'fixed', 
-        width: '100%', 
-        zIndex: 100, 
-        borderBottom: '1px solid rgba(255,255,255,0.1)', 
-        boxSizing: 'border-box',
-        backdropFilter: 'blur(15px)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        
-        {/* LOGO AREA */}
+      {/* NAVBAR */}
+      <nav style={{ padding: '12px 5%', background: 'rgba(0,0,0,0.8)', position: 'fixed', width: '100%', zIndex: 100, borderBottom: '1px solid rgba(255,255,255,0.1)', boxSizing: 'border-box', backdropFilter: 'blur(15px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div style={{
-            backgroundColor: '#E50914',
-            color: '#fff',
-            padding: '2px 9px',
-            borderRadius: '5px',
-            fontWeight: '900',
-            fontSize: '1.3rem',
-            fontStyle: 'italic',
-            boxShadow: '0 0 15px rgba(229, 9, 20, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>S</div>
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: '1.3rem', 
-            fontWeight: '900', 
-            letterSpacing: '0.5px',
-            background: 'linear-gradient(180deg, #ffffff 40%, #a1a1a1 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-          }}>
+          <div style={{ backgroundColor: '#E50914', color: '#fff', padding: '2px 9px', borderRadius: '5px', fontWeight: '900', fontSize: '1.2rem', fontStyle: 'italic', boxShadow: '0 0 15px rgba(229, 9, 20, 0.6)' }}>S</div>
+          <h1 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', letterSpacing: '0.5px', background: 'linear-gradient(180deg, #ffffff 40%, #a1a1a1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             TREAMING<span style={{ color: '#E50914', WebkitTextFillColor: '#E50914' }}>KU</span>
           </h1>
         </a>
-
-        {/* SEARCH BOX ANIMASI */}
-        <div style={{ position: 'relative' }}>
-          <input 
-            placeholder="Cari film..." 
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ 
-              background: 'rgba(255,255,255,0.1)', 
-              color: '#fff', 
-              border: '1px solid rgba(255,255,255,0.2)', 
-              padding: '8px 15px', 
-              borderRadius: '25px', 
-              width: '120px', 
-              outline: 'none',
-              fontSize: '0.85rem',
-              transition: 'all 0.4s ease',
-              boxSizing: 'border-box'
-            }}
-            onFocus={(e) => {
-              e.target.style.width = '200px';
-              e.target.style.background = 'rgba(255,255,255,0.15)';
-              e.target.style.borderColor = '#E50914';
-            }}
-            onBlur={(e) => {
-              e.target.style.width = '120px';
-              e.target.style.background = 'rgba(255,255,255,0.1)';
-              e.target.style.borderColor = 'rgba(255,255,255,0.2)';
-            }}
-          />
-        </div>
+        <input placeholder="Cari film..." onChange={(e) => setSearchTerm(e.target.value)} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 15px', borderRadius: '25px', width: '120px', outline: 'none', fontSize: '0.8rem' }} />
       </nav>
 
-      {/* GRID KONTEN */}
-      <div style={{ paddingTop: '100px', paddingLeft: '4%', paddingRight: '4%', paddingBottom: '40px' }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
-          gap: '15px' 
-        }}>
+      {/* SECTION POPULER (FEATURED) */}
+      {!searchTerm && featured.length > 0 && (
+        <div style={{ paddingTop: '80px', paddingBottom: '20px' }}>
+          <h3 style={{ paddingLeft: '5%', marginBottom: '15px', color: '#E50914', fontSize: '1rem', letterSpacing: '1px' }}>SEDANG POPULER</h3>
+          <div style={{ display: 'flex', overflowX: 'auto', gap: '15px', padding: '0 5%', scrollbarWidth: 'none' }}>
+            {featured.map((f) => (
+              <a href={`/watch/${f.id}`} key={f.id} style={{ textDecoration: 'none', flex: '0 0 280px', position: 'relative' }}>
+                <div style={{ width: '100%', paddingTop: '56.25%', borderRadius: '12px', overflow: 'hidden', background: '#111', border: '1px solid #222' }}>
+                   <img src={`https://images.weserv.nl/?url=${encodeURIComponent(f.thumbnail)}&w=600`} style={{ position: 'absolute', top: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: '0.7' }} />
+                   <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '15px', background: 'linear-gradient(to top, rgba(0,0,0,1), transparent)', boxSizing: 'border-box' }}>
+                      <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.title}</p>
+                      <span style={{ fontSize: '0.65rem', color: '#E50914', fontWeight: 'bold' }}>BARU DITAMBAHKAN</span>
+                   </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SEMUA FILM */}
+      <div style={{ padding: searchTerm ? '100px 5% 40px' : '20px 5% 40px' }}>
+        <h3 style={{ marginBottom: '15px', fontSize: '1rem', color: '#fff' }}>{searchTerm ? 'HASIL PENCARIAN' : 'SEMUA FILM'}</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '15px' }}>
           {filteredVideos.map((vid) => (
-            <a href={`/watch/${vid.id}`} key={vid.id} style={{ textDecoration: 'none', color: 'inherit', group: 'true' }}>
-              <div style={{ 
-                position: 'relative', 
-                paddingTop: '150%', 
-                borderRadius: '10px', 
-                overflow: 'hidden', 
-                background: '#111',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                <img 
-                  src={`https://images.weserv.nl/?url=${encodeURIComponent(vid.thumbnail)}&w=300`} 
-                  referrerPolicy="no-referrer"
-                  alt={vid.title}
-                  style={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    left: 0, 
-                    width: '100%', 
-                    height: '100%', 
-                    objectFit: 'cover' 
-                  }} 
-                  onError={(e) => { e.target.src = "https://via.placeholder.com/300x450?text=Error+Poster" }}
-                />
-                {/* Overlay Hitam Tipis biar judul kebaca kalau ada yang nempel */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  width: '100%',
-                  height: '40%',
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                  pointerEvents: 'none'
-                }}></div>
+            <a href={`/watch/${vid.id}`} key={vid.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div style={{ position: 'relative', paddingTop: '150%', borderRadius: '8px', overflow: 'hidden', background: '#111', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                <img src={`https://images.weserv.nl/?url=${encodeURIComponent(vid.thumbnail)}&w=300`} referrerPolicy="no-referrer" style={{ position: 'absolute', top: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <h4 style={{ 
-                fontSize: '0.8rem', 
-                marginTop: '10px', 
-                textAlign: 'left', 
-                fontWeight: '500', 
-                lineHeight: '1.2',
-                height: '2.4em', 
-                overflow: 'hidden',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                color: '#ddd'
-              }}>
-                {vid.title}
-              </h4>
+              <p style={{ fontSize: '0.75rem', marginTop: '8px', color: '#bbb', height: '2.4em', overflow: 'hidden' }}>{vid.title}</p>
             </a>
           ))}
         </div>
-
-        {filteredVideos.length === 0 && (
-          <div style={{ textAlign: 'center', marginTop: '100px', color: '#555' }}>
-            <p>Video tidak ditemukan...</p>
-          </div>
-        )}
       </div>
 
-      {/* FOOTER */}
-      <footer style={{ padding: '30px', textAlign: 'center', borderTop: '1px solid #111', color: '#333', fontSize: '0.8rem' }}>
-        © 2026 STREAMINGKU - All Rights Reserved
+      <footer style={{ padding: '40px', textAlign: 'center', color: '#333', fontSize: '0.7rem' }}>
+        © 2026 STREAMINGKU - PREMIUM INTERFACE
       </footer>
+
+      {/* CSS HIDE SCROLLBAR */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        div::-webkit-scrollbar { display: none; }
+      `}} />
     </div>
   )
 }
