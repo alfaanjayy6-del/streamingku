@@ -18,17 +18,17 @@ export default function RootLayout({ children }) {
           strategy="afterInteractive" 
         />
 
-        {/* SCRIPT HISTATS (Ganti 4900000 dengan ID Histats kamu) */}
-        <Script id="histats-counter" strategy="afterInteractive">
+        {/* HISTATS - ID: 5006689 */}
+        <Script id="histats-async" strategy="afterInteractive">
           {`
             var _Hasync= _Hasync|| [];
-            _Hasync.push(['Histats.start', '1,7301723,4,0,0,0,00010000']);
+            _Hasync.push(['Histats.start', '1,5006689,4,0,0,0,00010000']);
             _Hasync.push(['Histats.fasi', '1']);
             _Hasync.push(['Histats.track_hits', '']);
             (function() {
-            var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-            hs.src = ('//s10.histats.com/js15_as.js');
-            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+              var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+              hs.src = ('//s10.histats.com/js15_as.js');
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
             })();
           `}
         </Script>
@@ -71,10 +71,10 @@ export default function RootLayout({ children }) {
           </a>
         </div>
 
-        {/* BACKUP HISTATS (Ganti 4900000 dengan ID Histats kamu) */}
+        {/* NOSCRIPT BACKUP UNTUK HISTATS */}
         <noscript>
           <a href="/" target="_blank">
-            <img src="//sstatic1.histats.com/0.gif?7301723&101" alt="histats" border="0" />
+            <img src="//sstatic1.histats.com/0.gif?5006689&101" alt="histats counter" border="0" />
           </a>
         </noscript>
       </body>
