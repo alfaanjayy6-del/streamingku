@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
       <head>
         {/* IKLAN ADSTERRA */}
         <Script 
-          src="https://pl27333728.effectivegatecpm.com/e4/6a/bf/e46abf385099c2b5d894dbb1c522e30c.js" 
+          src="https://pl28784626.effectivegatecpm.com/dc/29/e7/dc29e7e90fa7083250f63a17a733bfda.js" 
           strategy="afterInteractive" 
         />
 
