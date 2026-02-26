@@ -23,8 +23,14 @@ export default function Admin() {
 
   useEffect(() => {
     const pass = prompt("Masukkan Password Admin:");
-    if (pass === PASSWORD_ADMIN) { setIsLoggedIn(true); fetchVideos(); } 
-    else { alert("Akses Ditolak!"); window.location.href = "/" }
+    if (pass === PASSWORD_ADMIN) { 
+      setIsLoggedIn(true); 
+      fetchVideos(); 
+    } 
+    else { 
+      alert("Akses Ditolak!"); 
+      window.location.href = "/" 
+    }
   }, [])
 
   const fetchVideos = async () => {
@@ -110,15 +116,15 @@ export default function Admin() {
         {/* FORM INPUT / EDIT */}
         <div style={{ flex: 1, minWidth: '300px', background: '#111', padding: '20px', borderRadius: '10px', border: editId ? '2px solid #3498db' : 'none' }}>
           <h3>{editId ? "📝 Mode Edit Video" : "➕ Tambah Manual"}</h3>
-          <input placeholder="Judul" value={judul} onChange={e => setJudul(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', color: '#000' }} />
-          <input placeholder="Link Video" value={linkVideo} onChange={e => setLinkVideo(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', color: '#000' }} />
-          <input placeholder="Link Thumbnail" value={linkPoster} onChange={e => setLinkPoster(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', color: '#000' }} />
+          <input placeholder="Judul" value={judul} onChange={e => setJudul(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', color: '#000', borderRadius: '5px' }} />
+          <input placeholder="Link Video" value={linkVideo} onChange={e => setLinkVideo(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', color: '#000', borderRadius: '5px' }} />
+          <input placeholder="Link Thumbnail" value={linkPoster} onChange={e => setLinkPoster(e.target.value)} style={{ width: '100%', padding: '10px', marginBottom: '10px', color: '#000', borderRadius: '5px' }} />
           
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={handleSimpan} style={{ flex: 1, padding: '12px', background: '#E50914', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+            <button onClick={handleSimpan} style={{ flex: 1, padding: '12px', background: '#E50914', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold', borderRadius: '5px' }}>
               {editId ? "UPDATE SEKARANG" : "SIMPAN MANUAL"}
             </button>
-            {editId && <button onClick={() => { setEditId(null); setJudul(''); setLinkVideo(''); setLinkPoster(''); }} style={{ padding: '12px', background: '#444', color: '#fff', border: 'none', cursor: 'pointer' }}>BATAL</button>}
+            {editId && <button onClick={() => { setEditId(null); setJudul(''); setLinkVideo(''); setLinkPoster(''); }} style={{ padding: '12px', background: '#444', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '5px' }}>BATAL</button>}
           </div>
         </div>
 
@@ -127,7 +133,7 @@ export default function Admin() {
           <h3>🚀 Tarik Video API</h3>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ fontSize: '0.8rem', color: '#888' }}>Mau tarik berapa video terbaru?</label>
-            <input type="number" value={limitSync} onChange={e => setLimitSync(e.target.value)} style={{ width: '100%', padding: '10px', marginTop: '5px', color: '#000' }} />
+            <input type="number" value={limitSync} onChange={e => setLimitSync(e.target.value)} style={{ width: '100%', padding: '10px', marginTop: '5px', color: '#000', borderRadius: '5px' }} />
           </div>
           <button onClick={syncDoodstream} disabled={loading} style={{ width: '100%', padding: '15px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
             {loading ? "MENARIK DATA..." : `SYNC ${limitSync} VIDEO BARU`}
@@ -136,17 +142,21 @@ export default function Admin() {
 
       </div>
 
-      <h3>Daftar Koleksi:</h3>
+      <h3>Daftar Koleksi ({videos.length}):</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
         {videos.map(v => (
           <div key={v.id} style={{ background: '#111', padding: '10px', borderRadius: '8px', border: '1px solid #222' }}>
             <div style={{ width: '100%', height: '110px', background: '#000', borderRadius: '5px', overflow: 'hidden', marginBottom: '10px' }}>
-                <img src={v.thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.src="https://via.placeholder.com/200x110?text=Blank+Image"} />
+                <img 
+                  src={`https://images.weserv.nl/?url=${encodeURIComponent(v.thumbnail)}&w=300&t=${v.id}`} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  onError={(e) => { e.target.src="https://via.placeholder.com/200x110?text=Error+Loading+Image" }}
+                />
             </div>
             <p style={{ fontSize: '0.75rem', height: '2.5em', overflow: 'hidden', margin: '5px 0' }}>{v.title}</p>
             <div style={{ display: 'flex', gap: '5px' }}>
-              <button onClick={() => handleEditKlik(v)} style={{ flex: 1, padding: '5px', background: '#f1c40f', border: 'none', cursor: 'pointer', borderRadius: '3px' }}>Edit</button>
-              <button onClick={() => handleHapus(v.id)} style={{ flex: 1, padding: '5px', background: 'red', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '3px' }}>Hapus</button>
+              <button onClick={() => handleEditKlik(v)} style={{ flex: 1, padding: '7px', background: '#f1c40f', border: 'none', cursor: 'pointer', borderRadius: '3px', fontWeight: 'bold' }}>Edit</button>
+              <button onClick={() => handleHapus(v.id)} style={{ flex: 1, padding: '7px', background: 'red', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '3px', fontWeight: 'bold' }}>Hapus</button>
             </div>
           </div>
         ))}
